@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=windows-1252">
+    <title>cl-mlep usage examples</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/highlight-lisp/highlight-lisp.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.lettering-0.6.1.min.js"></script>
+    <script type="text/javascript" src="js/highlight-brackets.js"></script>
+    
+    
+    <link rel="stylesheet" href="css/highlight-lisp-themes/github.css">
+  </head>
+  <body>
+    <div class="left">
+      <div class="toc">
+        <p class="head"><a href="#main">Main</a></p>
+        <p><a href="#loading">1. Loading the library</a></p>
+        <p><a href="#k-nearest">2. K-nearest neighbors</a></p>
+        <p><a href="#k-means">3. K-means</a></p>
+        <p><a href="#naive-bayes">4. Naive Bayes</a></p>
+		<p><a href="#markov-chains">5. Markov-Chains</a></p>
+        <p><a href="#perceptron">6. Perceptron</a></p>
+        <p><a href="#ml">7. Maximum-Likelihood</a></p>
+        <p><a href="#mlp">8. Multi-Layer-Perceptron</a></p>
+        <p class="head"><a href="#add">Additional</a></p>
+        <p><a href="#about-add">1. Why additional?</a></p>
+        <p><a href="#pca">2. Principal Component Analysis</a></p>
+        <br>
+        <p><a href="index.html">Back to Home</a></p>
+      </div>
+    </div>
+    <div class="right">
+      <h1><code>cl-mlep</code> usage examples</h1>
+      <h2 id="main">Main</h2>
+      <h3 id="loading">1. Loading the library</h3>
+      <div>
+        <p>To quickly load <code>cl-mlep</code> via <code>ASDF</code>,
+          you only have to load the <code>load.lisp</code> file.</p>
+        <!-- . If you haven't worked with <code>ASDF</code> much, the following commands load the library quickly:</p>
+  <pre><code class="lisp">CL-USER 1 > (require 'asdf)
+T
+
+CL-USER 2 > (push #P"/path/to/cl-mlep/" asdf:*central-registry*)
+(#P"/path/to/cl-mlep/")
+
+CL-USER 3 > (asdf:operate 'asdf:load-op 'mlep)
+; Loading ...
+</code></pre>
+ --> </div>
+      <h3 id="k-nearest">2. K-nearest neighbors</h3>
+      <div>
+        <p><em>K-nearest neighbors</em> is a supervised
+          classification-algorithm. It needs a bunch of annotated data
+          and classifies new data in respect of their closest <em>k</em>
+          neighbors.</p>
+        <p>To see how it works, we need some annotated data-points. We
+          can use <code class="lisp">mlep:random-from-to</code> to
+          create random data points within a given range.</p>
+        <pre id="two-dimensional-rand-point"><code class="lisp">CL-USER 1 &gt; (defun two-dimensional-rand-point (x y deviation)
+                   (list (mlep:random-from-to (- x deviation) (+ x deviation))
+                         (mlep:random-from-to (- y deviation) (+ y deviation))))
+TWO-DIMENSIONAL-RAND-POINT
+
+CL-USER 2 &gt; (setf data1 (loop repeat 5 collect (two-dimensional-rand-point 0.0 0.0 0.5)))
+((-0.20624078 0.2296449) (-0.099693775 0.34741652) (0.0016349554 -0.22699106) (0.48564255 0.36846137) (0.2091701 0.4648131))
+
+CL-USER 3 &gt; (setf data2 (loop repeat 5 collect (two-dimensional-rand-point 1.0 1.0 0.5)))
+((0.9635658 1.0198774) (0.5170319 1.1902282) (0.86289716 1.1215446) (0.77471984 0.6058432) (0.84753645 0.5458269))
+
+CL-USER 4 &gt; (setf class1 (loop repeat 5 collect 0))
+(0 0 0 0 0)
+
+CL-USER 5 &gt; (setf class2 (loop repeat 5 collect 1))
+(1 1 1 1 1)
+
+CL-USER 6 &gt; (setf data (append data1 data2))
+((-0.20624078 0.2296449) (-0.099693775 0.34741652) (0.0016349554 -0.22699106) (0.48564255 0.36846137) (0.2091701 0.4648131) (0.9635658 1.0198774) (0.5170319 1.1902282) (0.86289716 1.1215446) (0.77471984 0.6058432) (0.84753645 0.5458269))
+
+CL-USER 7 &gt; (setf classes (append class1 class2))
+(0 0 0 0 0 1 1 1 1 1)
+</code></pre>
+        <p>We have some data and their classes. Now we can create some
+          new non-annotated data and find out their labels.</p>
+        <pre><code class="lisp">CL-USER 8 &gt; (setf unknown (list (two-dimensional-rand-point 0.0 0.0 0.5)
+                                (two-dimensional-rand-point 1.0 1.0 0.5)))
+((-0.13086725 0.37243927) (0.55748845 0.97375334))
+
+CL-USER 9 &gt; (setf my-k-nearest (make-instance 'mlep:k-nearest-neighbors :k 2 :data-set data :set-labels classes :test-set unknown))
+#&lt;MLEP:K-NEAREST-NEIGHBORS 200A77C3&gt;
+
+CL-USER 10 &gt; (mlep:run my-k-nearest)
+#(0 1)
+</code></pre>
+        <p>As expected, our first point was labeled with class 0, and
+          the second point was labeled with class 1.</p>
+      </div>
+      <h3 id="k-means">3. K-means</h3>
+      <div>
+        <p><em>K-means</em> is an unsupervised algorithm for finding
+          groups (or clusters) in data. This means it analyzes a bunch
+          of non-annotated data and tries to annotate them. The only
+          information it needs is how many groups (or clusters) it
+          should find.</p>
+        <p>Let's create some two-dimensional example data to see how it
+          works. (See <a href="#two-dimensional-rand-point">above</a>
+          for the definition of <code class="lisp">two-dimensional-rand-point</code>.)</p>
+        <pre><code class="lisp">CL-USER 1 &gt; (setf points nil)
+NIL
+
+CL-USER 2 &gt; (loop repeat 3 do (push (two-dimensional-rand-point 0.0 0.0 0.3) points))
+NIL
+
+CL-USER 3 &gt; (loop repeat 4 do (push (two-dimensional-rand-point -1.0 -1.0 0.3) points))
+NIL
+
+CL-USER 4 &gt; (loop repeat 5 do (push (two-dimensional-rand-point 1.0 1.0 0.3) points))
+NIL
+
+CL-USER 5 &gt; points
+((0.9022328 1.1297006) (0.9545768 1.2591648) (0.8022821 0.72557325) (1.1125106 1.2012937) (1.2998998 1.15453) (-1.0642121 -1.1677663) (-0.80928034 -1.2820536) (-0.9318311 -0.7362524) (-1.1115009 -1.0392372) (0.091020376 -0.20297185) (0.1572577 -0.16292654) (-0.19775212 0.054478825))
+</code></pre>
+        <p>Humans can clearly see three clusters in this bunch of
+          non-annotated data:</p>
+        <pre><code class="lisp">CL-USER 5 &gt; (mlep:plot-points points)
+                                                                     x    x      
+                                                                   x            x
+                                                                                 
+                                                                                 
+                                                               x                 
+                                                                                 
+                                                                                 
+                                                                                 
+                                                                                 
+                              x                                                  
+                                                                                 
+                                          x                                      
+                                        x                                        
+                                                                                 
+                                                                                 
+                                                                                 
+      x                                                                          
+                                                                                 
+x                                                                                
+  x                                                                              
+          x                                                                      
+x: [-1.111500859260559D0, 1.2998998165130616D0]
+y: [-1.2820535898208619D0, 1.259164810180664D0]
+</code></pre>
+        <p>Let's use the k-means algorithm to obtain the means of these
+          points. We create an instance of <code class="lisp">mlep:k-means</code>
+          and run its <code class="lisp">mlep:run</code> method. It
+          computes <em>k</em> means and, if things turn out all right,
+          we can recover the groups of our points with <code
+            class="lisp">mlep:classify</code>.</p>
+        <pre><code class="lisp">CL-USER 6 &gt; (setf my-k-means (make-instance 'mlep:k-means :k 3 :data-set points))
+#&lt;MLEP:K-MEANS 200DAB1F&gt;
+
+CL-USER 7 &gt; (mlep:run my-k-means :epochs 100)
+((-0.9792061 -1.0563274) (1.0143004 1.0940526) (0.016841988 -0.10380652))
+
+CL-USER 8 &gt; (mlep:classify my-k-means)
+(1 1 1 1 1 0 0 0 0 2 2 2)
+</code></pre>
+        <p>Also new data can be compared against the computed means, like this:</p>
+        <pre><code class="lisp">CL-USER 7 &gt; (mlep:classify my-k-means :new-data-set '((0.0 0.0) (-1 -1) (1 1)))
+(1 0 2)
+</code></pre>
+      </div>
+      <h3 id="naive-bayes">4. Naive Bayes</h3>
+      <div>
+        <p><em>Naive Bayes</em> is a supervised classification algorithm
+          which uses a probabilistic approach. The <em>naive</em>
+          assumption is the independence of all features. Although in
+          reality features are often correlated, in many cases the
+          results are still good enough. The basic version of this
+          algorithm deals with discrete data.</p>
+        <p>Let's take some <code>mlep</code>-included data-set to try
+          out Naive Bayes. We can use <code class="lisp">mlep:*lenses*</code>
+          which maps features of patients (such as age or tear
+          production rate) to a recommendation to use hard or soft
+          contact lenses, or not using contact lenses at all. If you are
+          interested in more details about this data-set, run <code
+            class="lisp">(documentation 'mlep:*lenses* 'variable)</code>.</p>
+        <pre><code class="lisp">CL-USER 1 &gt; (setf data mlep:*lenses*)
+((1 1 1 1 3) (1 1 1 2 2) (1 1 2 1 3) (1 1 2 2 1) (1 2 1 1 3) (1 2 1 2 2) (1 2 2 1 3) (1 2 2 2 1) (2 1 1 1 3) (2 1 1 2 2) (2 1 2 1 3) (2 1 2 2 1) (2 2 1 1 3) (2 2 1 2 2) (2 2 2 1 3) (2 2 2 2 3) (3 1 1 1 3) (3 1 1 2 3) (3 1 2 1 3) (3 1 2 2 1) (3 2 1 1 3) (3 2 1 2 2) (3 2 2 1 3) (3 2 2 2 3))
+
+CL-USER 2 &gt; (setf features (mapcar #'butlast data))
+((1 1 1 1) (1 1 1 2) (1 1 2 1) (1 1 2 2) (1 2 1 1) (1 2 1 2) (1 2 2 1) (1 2 2 2) (2 1 1 1) (2 1 1 2) (2 1 2 1) (2 1 2 2) (2 2 1 1) (2 2 1 2) (2 2 2 1) (2 2 2 2) (3 1 1 1) (3 1 1 2) (3 1 2 1) (3 1 2 2) (3 2 1 1) (3 2 1 2) (3 2 2 1) (3 2 2 2))
+
+CL-USER 3 &gt; (setf targets (mapcar #'(lambda (x) (first (last x))) data))
+(3 2 3 1 3 2 3 1 3 2 3 1 3 2 3 3 3 3 3 1 3 2 3 3)
+</code></pre>
+      </div>
+      <p>Now we have separated the features from the labels. Let's use
+        Naive Bayes to predict the label of a feature vector which
+        already exists in the data set.</p>
+      <pre><code class="lisp">CL-USER 4 &gt; (setf my-bayes (make-instance 'mlep:naive-bayes :data-set features :set-labels targets :test-set '((3 2 1 2))))
+#&lt;MLEP:NAIVE-BAYES 20095703&gt;
+
+CL-USER 5 &gt; (mlep:run my-bayes)
+(2)
+</code></pre>
+      As expected it maps the feature vector to the correct class. Let's
+      remove this feature vector from the already known data-set and run
+      the algorithm again:
+      <pre><code class="lisp">CL-USER 6 &gt; (setf (mlep:data-set my-bayes) (append (subseq (mlep:data-set my-bayes) 0 21)
+                                                   (subseq (mlep:data-set my-bayes) 22)))
+((1 1 1 1) (1 1 1 2) (1 1 2 1) (1 1 2 2) (1 2 1 1) (1 2 1 2) (1 2 2 1) (1 2 2 2) (2 1 1 1) (2 1 1 2) (2 1 2 1) (2 1 2 2) (2 2 1 1) (2 2 1 2) (2 2 2 1) (2 2 2 2) (3 1 1 1) (3 1 1 2) (3 1 2 1) (3 1 2 2) (3 2 1 1) (3 2 2 1) (3 2 2 2))
+
+CL-USER 7 &gt;  (setf (mlep:set-labels my-bayes) (append (subseq (mlep:set-labels my-bayes) 0 21)
+                                                      (subseq (mlep:set-labels my-bayes) 22)))
+(3 2 3 1 3 2 3 1 3 2 3 1 3 2 3 3 3 3 3 1 3 3 3)
+
+CL-USER 8 &gt; (mlep:test-set my-bayes) ; test-set has not changed
+((3 2 1 2))	
+
+CL-USER 9 &gt; (mlep:run my-bayes)
+(3)
+</code></pre>
+      <p>Oops, now we have another class. Why? Well, we have removed an
+        item from a training set of only 24 items. These are quite few
+        for a statistical inference anyway. But only 5 items in the
+        training belong to the target class number 2 — and from these we
+        removed the only one which has its first attribute equal to 3.
+        Thus the likelihood for class 2, given that the first attribute
+        equals 3 is plainly zero. Because Bayes Rule is multiplicative,
+        the overall likelihood for class 2, given any feature vector
+        with its first attribute being 3 is plainly zero. So if you want
+        to make good inference with Naive Bayes, make sure to have a
+        large enough training corpus. There exists a method called <em>Laplacian
+		Smoothing</em> to improve this kind of situation, but it isn't
+        implemented yet.</p>
+	  <h3 id="markov-chains">5. Markov-Chains</h3>
+	  <div> <p>A Markov-Chain models the probabilities of a process. It takes a
+		finite number of past events into account for the probability of the
+		current event. This number is called the <em>order</em> of the
+		Markov-Chain. Let's create some pseudo-English by analyzing a bit of
+		Shakespeare.</p>
+		<pre><code class="lisp">CL-USER 1 > (setf text "To be or not to be that is the question Whether tis nobler in the mind to suffer The slings and arrows of outrageous fortune Or to take arms against a sea of troubles And by opposing end them To die to sleep No more and by a sleep to say we end The heartache and the thousand natural shocks That flesh is heir to tis a consummation Devoutly to be wishd To die to sleep To sleep perchance to dream ay theres the rub For in that sleep of death what dreams may come When we have shuffled off this mortal coil Must give us pause theres the respect That makes calamity of so long life For who would bear the whips and scorns of time The oppressors wrong the proud mans contumely The pangs of despised love the laws delay The insolence of office and the spurns That patient merit of the unworthy takes When he himself might his quietus make With a bare bodkin who would fardels bear To grunt and sweat under a weary life But that the dread of something after death The undiscoverd country from whose bourn No traveller returns puzzles the will And makes us rather bear those ills we have Than fly to others that we know not of Thus conscience does make cowards of us all And thus the native hue of resolution Is sicklied oer with the pale cast of thought And enterprises of great pith and moment With this regard their currents turn awry And lose the name of action Soft you now The fair Ophelia Nymph in thy orisons Be all my sins rememberd")
+"To be or not to be that is the ..."
+
+CL-USER 2 > (setf chain (make-instance 'mlep:markov-chain :data-set text :order 1))
+#&lt;MLEP:MARKOV-CHAIN 200B8DCB&gt;
+
+CL-USER 3 > (mlep:run chain)
+#2A((0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 1/2 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) ...)
+</code></pre>
+		<p>We get the probability matrix for our first order matrix. Now we can synthesize some pseudo-English text: </p>
+	<pre><code class="lisp">CL-USER 4 > (mlep:synthesize chain :howmany 50)
+"ff d cemirenouie shafes msomeser thee t tll To geer"
+</code></pre>
+	<p>If this does not satisfy ourself one can take more past events into account by changing the order:</p>
+	<pre><code class="lisp">CL-USER 5 > (setf (mlep:order chain) 2)
+2
+
+CL-USER 4 > (mlep:run chain)
+#3A(((0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) ...) ...)
+
+CL-USER 5 > (mlep:synthesize chain :howmany 50)
+"the of use pat tion thout drent a No despithatise an"
+
+CL-USER 6 > (setf (mlep:order chain) 3)
+3
+
+CL-USER 7 > (mlep:run chain)
+#4A((((0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) ...) ...)
+
+CL-USER 8 > (mlep:synthesize chain :howmany 50)
+" that pith and arrows death and Thus and ent and be o"
+	</code></pre>
+	<p>One can also use these probabilities to figure out how likely a particular sequence is...</p>
+<pre><code class="lisp">CL-USER 9 > (mlep:analyze chain "we love lisp")
+0
+</code></pre>
+<p>Hmpf... Let's lower the order again.</p>
+<pre><code class="lisp">CL-USER 10 > (setf (mlep:order chain) 1)
+1
+
+CL-USER 11 > (mlep:run chain)
+##2A((0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 1/2 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) (0 0 0 0 0 0 0 0 0 0 ...) ...)
+
+CL-USER 12 > (mlep:analyze chain "we love lisp")
+729/4843598869120
+</code></pre>
+
+</div>
+
+      <h3 id="perceptron">6. Perceptron</h3>
+      <div>
+        <p>A Perceptron is a very simplified model of a brain neuron
+          cell. A single-layer perceptron is an algorithm only capable
+          of linear separation of binary classes.</p>
+        <p>We will give simple training data of an <em>and</em>-function.</p>
+        <pre><code class="lisp">CL-USER 1 &gt; (setf nerve (make-instance 'mlep:perceptron :data-set '((0 0) (1 0) (0 1) (1 1)) :set-labels '(0 0 0 1)))
+#&lt;MLEP:PERCEPTRON 200CEF83&gt;
+
+CL-USER 2 &gt; (mlep:run nerve)
+0
+</code></pre>
+        <p>If we run the algorithm, it iteratively learns the data until
+          its error rate reaches a threshold. Since this data-set is
+          clearly linearly separable, it converges with error 0. Now we
+          can classify something new:</p>
+        <pre><code class="lisp">CL-USER 3 &gt; (mlep:classify nerve :new-data-set '((0.8 0.7) (0.9 0.9)))
+(0 1)
+</code></pre>
+        <p>With this 2-dimensional input, it's very easy to classify a
+          discretized plane and visualize its output:</p>
+        <pre><code class="lisp">CL-USER 4 &gt; (dolist (y (loop for y from 1 downto 0 by 1/10 collect y))
+               (dolist (x (loop for x from 0 to 1 by 1/10 collect x))
+                 (if (= (first (mlep:classify nerve :new-data-set `((,x ,y)))) 1)
+                     (princ #\X)
+                   (princ #\.)))
+               (terpri))
+........XXX
+..........X
+...........
+...........
+...........
+...........
+...........
+...........
+...........
+...........
+...........
+NIL
+</code></pre>
+        <h3 id="ml">7. Maximum-Likelihood</h3>
+        <div>
+          <p><em>Maximum-Likelihood</em> is a method for finding the
+            mean and variance resp. co-variance matrix of a uni- or
+            multi-variate normal distribution, given some data-points
+            from this distribution.</p>
+          <p>Let's analyze one variable of the <code class="lisp">mlep:*iris*</code>
+            data-set — the sepal length of all flowers in the set. If
+            you are interested in more details about this data-set, run
+            <code class="lisp">(documentation 'mlep:*iris* 'variable)</code>.</p>
+          <pre><code class="lisp">CL-USER 1 &gt; (setf data (mapcar #'first mlep:*iris*))
+(5.1 4.9 4.7 4.6 5.0 5.4 4.6 5.0 4.4 4.9 5.4 4.8 4.8 4.3 5.8 5.7 5.4 5.1 5.7 5.1 5.4 5.1 4.6 5.1 4.8 5.0 5.0 5.2 5.2 4.7 4.8 5.4 5.2 5.5 4.9 5.0 5.5 4.9 4.4 5.1 ...)
+
+CL-USER 2 &gt; (setf lik (make-instance 'mlep:max-likelihood :data-set data))
+#&lt;MLEP:MAX-LIKELIHOOD 200C107F&gt;
+
+CL-USER 2 &gt; (mlep:run lik)
+(#(5.8433347) #2A((0.6811218)))
+</code></pre>
+          <p>The average sepal length is 5.8433347 (the mean) and its
+            variance is 0.6811218. These data are all needed to
+            perfectly describe a normal distribution. You can use a
+            package like <a href="https://github.com/tpapp/cl-random/"
+              target="_blank"><code>cl-random</code></a> (see here for
+            some <a href="notes_cl-random.html">notes</a> to <code>cl-random</code>)
+            to generate new data from this distribution.</p>
+        </div>
+        <h3 id="mlp">9. Multi-Layer-Perceptron</h3>
+        <div>
+          <p>Whereas a simple <em>Single-Layer-Perceptron</em> is only
+            capable of solving linear separation problems, arbitrary
+            separation problems can be solved with <em>Multi-Layer-Perceptrons</em>.
+            A classical and simple non-linear separation problem is the
+            XOR-problem. Let's create a simple Multi-Layer-Perceptron
+            with one hidden layer and give it the XOR-data:</p>
+          <pre><code class="lisp">CL-USER 1 &gt; (setf net (make-instance 'mlep:neuronal-network :data-set '((0 0) (0 1) (1 0) (1 1)) :set-labels '((0) (1) (1) (0)) :net-structure '(2 2 1)))
+#&lt;MLEP:NEURONAL-NETWORK 20098313&gt;
+
+CL-USER 2 &gt; (mlep:classify net :verbose t)
+(0 0) -&gt; #(-0.002361596525533569D0) (target: (0))
+(0 1) -&gt; #(6.148419824708274D-5) (target: (1))
+(1 0) -&gt; #(-0.006948563803440808D0) (target: (1))
+(1 1) -&gt; #(-0.004555458722841094D0) (target: (0))
+</code></pre>
+          <p>These results are totally random because the net has not
+            been trained. Let's do it:</p>
+          <pre><code class="lisp">CL-USER 3 &gt; (mlep:run net :epochs 1000)
+
+CL-USER 4 &gt; (mlep:classify net :verbose t)
+(0 0) -&gt; #(5.093567407637688D-4) (target: (0))
+(0 1) -&gt; #(0.9761285071400777D0) (target: (1))
+(1 0) -&gt; #(0.9766668482914585D0) (target: (1))
+(1 1) -&gt; #(-0.00368396563465207D0) (target: (0))
+</code></pre>
+          <p>We see it learned XOR.</p>
+        </div>
+        <h2 id="add">Additional</h2>
+        <h3 id="about-add">1. Why Additional?</h3>
+        <div>
+          <p>An important idea of <code>cl-mlep</code> is that it
+            should be easily accessible for beginners in both machine
+            learning and Common Lisp. So you just need a CL
+            implementation with <code>ASDF</code> and you can start
+            right away. Some parts of <code>cl-mlep</code> which need
+            dependencies are in a separate package <code>cl-mlep-add</code>.
+            Presently, it's only <em>Principal Component
+              Analysis</em>, which depends on <em>Singular Value
+              Decomposition</em>, provided by <code>lla</code> (Lisp
+            Linear Algebra).</p>
+          <p>If you want to use these additional algorithms you have to
+            meet the requirements and load <code>load-with-add.lisp</code>.
+            You need to have installed: </p>
+          <ul>
+            <li><code>Quicklisp</code>: <a
+                href="http://www.quicklisp.org/" target="_blank">http://www.quicklisp.org/</a></li>
+            <li><code>LAPACK</code>: <a
+                href="http://www.netlib.org/lapack/" target="_blank">http://www.netlib.org/lapack/</a></li>
+            <li><code>BLAS</code>: <a
+                href="http://www.netlib.org/blas/" target="_blank">http://www.netlib.org/blas/</a></li>
+            <li><code>Quicklisp</code> will automatically load
+              everything else, including <code>cffi</code>. Be sure
+              that the directory containing the dynamic libraries of <code>LAPACK</code>
+              and <code>BLAS</code> is known to <code>cffi</code>, for
+              example: <code class="lisp">(push #P"/usr/lib/"
+                cffi:*foreign-library-directories*)</code>. You find
+              this line of code in <code>load-with-add.lisp</code> —
+              adjust it to your needs.</li>
+          </ul>
+        </div>
+        <h3 id="pca">2. Principal Component Analysis</h3>
+        <div>
+          <p>Principal Component Analysis tries to project data on their
+            principal components. Components with small variance can be
+            omitted for the sake of dimensionality reduction. To see how
+            it works, let's create a random feature and a second feature
+            that is pretty much the same as the first one, with small
+            random variations.</p>
+        </div>
+        <pre><code class="lisp">CL-USER 1 &gt; (setf xdata (append (loop repeat 10 collect (- (random 1.0) 5.0))
+                                (loop repeat 10 collect (random 1.0))
+                                (loop repeat 10 collect (+ (random 1.0) 5.0))))
+(-4.411461 -4.958538 -4.634544 -4.671262 -4.2285547 -4.443547 -4.5705295 -4.7969036 -4.2266717 -4.6763134 ...)
+
+CL-USER 2 &gt; (setf data (mapcar #'(lambda (x) (list x (+ x (random 0.3)))) xdata))
+((-4.411461 -4.1482973) (-4.958538 -4.8813233) (-4.634544 -4.5045123) (-4.671262 -4.504089) (-4.2285547 -4.0350056) (-4.443547 -4.3113537) (-4.5705295 -4.5701866) (-4.7969036 -4.780784) (-4.2266717 -4.1110835) (-4.6763134 -4.5102124) ...)
+
+CL-USER 3 &gt; (mlep:plot-points data)
+                                                                               xx
+                                                                            xx   
+                                                                         xxx     
+                                                                                 
+                                                                                 
+                                                                                 
+                                                                                 
+                                                                                 
+                                                                                 
+                                           x                                     
+                                      xxx                                        
+                                     xx                                          
+                                                                                 
+                                                                                 
+                                                                                 
+                                                                                 
+                                                                                 
+                                                                                 
+     x                                                                           
+  xxxx                                                                           
+xx                                                                               
+x: [-4.958538055419922D0, 5.985260486602783D0]
+y: [-4.881323337554932D0, 6.277431011199951D0]
+</code></pre>
+        <p>Now let's use Principal Component Analysis to project these
+          data on their Principal Components: </p>
+        <pre><code class="lisp">CL-USER 4 &gt; (setf pca (make-instance 'mlep-add:principal-component-analysis :data-set data))
+  #&lt;MLEP-ADD:PRINCIPAL-COMPONENT-ANALYSIS 225D6A8F&gt;
+
+CL-USER 5 &gt; (mlep:run pca)
+(#2A((0.21308439884523034D0 0.34528975298029674D0) (0.24127064138755183D0 -0.07502821093204648D0) (0.22584342115723102D0 0.04174046515058644D0) (0.2266394465250094D0 0.12796173805753736D0) (0.2065708174636781D0 0.18191251809778103D0) (0.2173887623705464D0 0.04375895274031859D0) (0.2258895296867234D0 -0.2583269437280901D0) (0.235505236215384D0 -0.21842916509260096D0) (0.2082094566617837D0 0.0020986392553300408D0) (0.22688546849976157D0 0.1255682261630231D0) ...) #2A((-0.7047298990488011D0 -0.7094757003496781D0) (-0.7094757003496781D0 0.7047298990488011D0)) #(32.12935523773922D0 0.3055957747001796D0))
+
+CL-USER 6 &gt; (mlep:plot-points (mlep-add:transform pca))
+                                                                           x     
+                                         x                                       
+                                                                                 
+x                                                                                
+    x                                      x                                     
+ x                                                                        x      
+                                                                              x  
+   x  x                                                                       x  
+                                     x                                           
+                                                                            xx   
+                                                                           x     
+ x                                    x                                          
+       x                                                                        x
+      x                                  x                                       
+                                           x                                     
+                                         x                                       
+      x                               x  x                                       
+                                                                               x 
+ x                                                                           x   
+                                                                                 
+                                          x                                      
+x: [-7.877416952765128D0, 7.751870145577836D0]
+y: [-0.10089977392073896D0, 0.10551908955805312D0]
+</code></pre>
+        <p>You see the whole space is shifted so that the main diagonal
+          becomes the x-axis. The y-axis has very little variance: this
+          dimension could be left out if we want to reduce the
+          dimensionality:</p>
+        <pre><code class="lisp">CL-USER 7 &gt; (mlep-add:transform pca)
+#2A((6.846264346118506D0 0.10551908955805312D0) (7.751870145577836D0 -0.022928304244144382D0) (7.256203506467024D0 0.012755709784042502D0) (7.281779288286627D0 0.03910456647367777D0) (6.636987176040697D0 0.05559169689575416D0) (6.98456077089576D0 0.013372551062748706D0) (7.257684943790574D0 -0.07894362249451259D0) (7.566631394711758D0 -0.06675102992358362D0) (6.6896355969431145D0 6.413352890510815D-4) (7.289683815709729D0 0.038373119352018925D0) ...)
+
+CL-USER 8 &gt; (mlep-add:transform pca :components 1)
+#2A((6.846264346118506D0) (7.751870145577836D0) (7.256203506467024D0) (7.281779288286627D0) (6.636987176040697D0) (6.98456077089576D0) (7.257684943790574D0) (7.566631394711758D0) (6.6896355969431145D0) (7.289683815709729D0) ...)
+</code></pre>
+        <div>
+          <hr>
+          <address> <a href="mailto:frank_zalkow@web.de">Frank Zalkow</a>
+          </address>
+        </div>
+        <script type="text/javascript">HighlightLisp.highlight_auto();</script>
+      </div>
+    </div>
+  </body>
+</html>

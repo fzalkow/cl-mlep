@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=windows-1252">
+    <title>Notes to cl-random</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/highlight-lisp/highlight-lisp.js"></script>
+    <link rel="stylesheet" href="css/highlight-lisp-themes/github.css">
+  </head>
+  <body>
+    <h1>Notes to <code>cl-random</code></h1>
+    <div>
+      <p>I failed to fully install <code>cl-random</code> on Mac OS X,
+        although it is available via <a
+          href="http://www.quicklisp.org/" target="_blank"><code>quicklisp</code></a>,
+        which makes things way easier. I mainly failed to get <code>cl-rmath</code>
+        (a dependency of <code>cl-random</code>) working properly with
+        <code>libRmath</code>. Although I succeded in compiling and
+        installing <code>libRmath.dylib</code> for my architecture,
+        CFFI gives me the message <em>Unable to load foreign library
+          (LIBRMATH). / Could not register handle for external module
+          LIBRMATH: / no suitable image found. Did find: /
+          /usr/lib/libRmath.dylib: mach-o, but wrong architecture.</em>
+        I have no clue why... Here is what I have achieved so far:</p>
+      <p><code>cl-rmath</code> seems not to be needed to correctly draw
+        samples from a multivariate normal distribution. Here is what I
+        did:</p>
+      <ul>
+        <li>install the following dependencies with <code>quicklisp</code>:
+          <code>alexandria</code>, <code>anaphora</code>, <code>array-operations</code>,
+          <code>cl-num-utils</code>, <code>cl-slice</code>, <code>let-plus</code>,
+          <code>lla</code></li>
+        <ul>
+          <li>Loading <code>lla</code> needs <code>blas</code> and <code>lapack</code>
+            to be installed. This <a
+href="http://pheiter.wordpress.com/2012/09/04/howto-installing-lapack-and-blas-on-mac-os/"
+              target="_blank">blog entry</a> describes how to install it</li>
+          <li>If it doesn't find the foreign libraries for <code>lla</code>,
+            you may have to give the path to its directory like this: <code
+              class="lisp">(push #P"/usr/lib/"
+              cffi:*foreign-library-directories*)</code></li>
+        </ul>
+        <li>download the source of <a
+            href="https://github.com/tpapp/cl-random" target="_blank"><code>cl-random</code></a></li>
+        <li>you need to load the following files from the <code>src/</code>
+          folder: <code>internals.lisp</code>, <code>package.lisp</code>,
+          <code>random.lisp</code>, <code>multivariate.lisp</code> as
+          well as the function definition <code>draw-standard-normal</code>
+          from <code>univariate.lisp</code></li>
+      </ul>
+      <p>You SHOULD now be able to draw random samples from a
+        multivariate normal distribution:</p>
+      <pre><code class="lisp">CL-USER 1 &gt; (setf distribution (cl-random::r-multivariate-normal #(1 2)
+                                                                 (cl-random::mm t #2a((1 2)
+                                                                                      (3 4)))))
+#S(CL-RANDOM::R-MULTIVARIATE-NORMAL :N 2 :MEAN #(1 2) :VARIANCE-LEFT-SQRT #&lt;CL-NUM-UTILS.MATRIX:LOWER-TRIANGULAR-MATRIX element-type DOUBLE-FLOAT
+  3.16228       .
+  4.42719 0.63246&gt;)
+
+CL-USER 2 &gt; (cl-random:draw distribution)
+#(0.20293392998246396D0 0.28948779023461224D0)
+</code></pre>
+      <p>But if we generate some data and try to re-construct its mean
+        and co-variance matrix, it doesn't fit...</p>
+      <pre><code class="lisp">CL-USER 3 &gt; (setf data (loop repeat 1000 collect (coerce (cl-random:draw distribution) 'list)))
+((2.777448778345402D0 5.218260204218044D0) (2.4401058735625983D0 4.318675829774026D0) (-3.1800525694534816D0 -2.5749326526079886D0) (3.289998442578751D0 6.533266966322055D0) ...)
+
+CL-USER 4 &gt; (setf lik (make-instance 'mlep:max-likelihood :data-set data))
+#&lt;MLEP:MAX-LIKELIHOOD 227B4C83&gt;
+
+CL-USER 5 &gt; (mlep:run lik)
+(#(0.7370068251772093D0 1.6190530720731782D0) #2A((9.490688560267179D0 13.240753178128449D0) (13.240753178128449D0 18.8576808919066D0)))
+</code></pre>
+      <p>So, the co-variance matrix is clearly not wat we wanted to
+        achieve. I've tested that against <code>numpy.cov</code> from
+        Pythons <a href="http://www.numpy.org/" target="_blank"><code>numpy</code></a>
+        and got the same results. So <code>mlep:max-likelihood</code>
+        works fine. The samples are drawn wrongly... If you succeed in
+        getting this to work all right and/or know what I've done wrong,
+        please report!</p>
+      <p><a href="javascript:history.back()">[back]</a></p>
+    </div>
+    <script type="text/javascript">HighlightLisp.highlight_auto();</script>
+  </body>
+</html>
