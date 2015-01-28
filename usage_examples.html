@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="windows-1252">
+    <meta charset="utf-8">
     <title>cl-mlep usage examples</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <script type="text/javascript" src="js/highlight-lisp/highlight-lisp.js"></script>
@@ -222,7 +222,7 @@ CL-USER 9 &gt; (mlep:run my-bayes)
       <p>Oops, now we have another class. Why? Well, we have removed an
         item from a training set of only 24 items. These are quite few
         for a statistical inference anyway. But only 5 items in the
-        training belong to the target class number 2 — and from these we
+        training belong to the target class number 2 â€“ and from these we
         removed the only one which has its first attribute equal to 3.
         Thus the likelihood for class 2, given that the first attribute
         equals 3 is plainly zero. Because Bayes Rule is multiplicative,
@@ -334,7 +334,7 @@ NIL
             multi-variate normal distribution, given some data-points
             from this distribution.</p>
           <p>Let's analyze one variable of the <code class="lisp">mlep:*iris*</code>
-            data-set — the sepal length of all flowers in the set. If
+            data-set ? the sepal length of all flowers in the set. If
             you are interested in more details about this data-set, run
             <code class="lisp">(documentation 'mlep:*iris* 'variable)</code>.</p>
           <pre><code class="lisp">CL-USER 1 &gt; (setf data (mapcar #'first mlep:*iris*))
@@ -412,7 +412,7 @@ CL-USER 4 &gt; (mlep:classify net :verbose t)
               and <code>BLAS</code> is known to <code>cffi</code>, for
               example: <code class="lisp">(push #P"/usr/lib/"
                 cffi:*foreign-library-directories*)</code>. You find
-              this line of code in <code>load-with-add.lisp</code> —
+              this line of code in <code>load-with-add.lisp</code> ?
               adjust it to your needs.</li>
           </ul>
         </div>
