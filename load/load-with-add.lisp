@@ -1,10 +1,9 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10 -*-
 
-(ql:quickload :cffi)
-(push #P"/usr/lib/" cffi:*foreign-library-directories*)
-(ql:quickload :lla)
-
-(let ((directory (pathname-directory *load-truename*)))
+(let ((directory (butlast (pathname-directory *load-truename*))))
+  (ql:quickload :cffi)
+  (load (make-pathname :directory (append directory '("src" "additional")) :name "push-cffi-dir" :type "lisp"))
+  (ql:quickload :lla)
   (unless (find-package :lla)
     (error "LLA must be loaded first: https://github.com/tpapp/lla/"))
   (unless (find-package :asdf)

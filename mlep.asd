@@ -7,10 +7,10 @@
 
 (defsystem :mlep
     :name "mlep"
-    :version "0.0.0"
+    :version "0.0.1"
     :maintainer "Frank Zalkow <frank_zalkow@web.de>"
     :author "Frank Zalkow <frank_zalkow@web.de>"
-    :licence "CC BY 3.0 license <http://creativecommons.org/licenses/by/3.0>"
+    :licence "MIT License <http://opensource.org/licenses/MIT>"
     :description
     "A Common Lisp machine learning library for educational purposes."
     :long-description

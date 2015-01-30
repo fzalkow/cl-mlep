@@ -3,7 +3,7 @@
 (unless (find-package :asdf)
   (require :asdf))
 
-(let ((directory (make-pathname :directory (pathname-directory *load-truename*))))
+(let ((directory (make-pathname :directory (butlast (pathname-directory *load-truename*)))))
   (unless (member directory asdf:*central-registry*)
     (push directory asdf:*central-registry*)))
 
