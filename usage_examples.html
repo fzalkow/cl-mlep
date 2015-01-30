@@ -36,19 +36,11 @@
       <h2 id="main">Main</h2>
       <h3 id="loading">1. Loading the library</h3>
       <div>
-        <p>To quickly load <code>cl-mlep</code> via <code>ASDF</code>,
-          you only have to load the <code>load.lisp</code> file.</p>
-        <!-- . If you haven't worked with <code>ASDF</code> much, the following commands load the library quickly:</p>
-  <pre><code class="lisp">CL-USER 1 > (require 'asdf)
-T
-
-CL-USER 2 > (push #P"/path/to/cl-mlep/" asdf:*central-registry*)
-(#P"/path/to/cl-mlep/")
-
-CL-USER 3 > (asdf:operate 'asdf:load-op 'mlep)
-; Loading ...
-</code></pre>
- --> </div>
+        <p>To quickly load <code>cl-mlep</code> via <code>ASDF</code>, you only
+          have to load the <code>load/load.lisp</code> file. If you have the
+          path findable for <code>Quicklisp</code> you also can evaluate
+          <code class="lisp">(ql:quickload :mlep)</code>.</p>
+	  </div>
       <h3 id="k-nearest">2. K-nearest neighbors</h3>
       <div>
         <p><em>K-nearest neighbors</em> is a supervised
@@ -396,9 +388,12 @@ CL-USER 4 &gt; (mlep:classify net :verbose t)
               Analysis</em>, which depends on <em>Singular Value
               Decomposition</em>, provided by <code>lla</code> (Lisp
             Linear Algebra).</p>
-          <p>If you want to use these additional algorithms you have to
-            meet the requirements and load <code>load-with-add.lisp</code>.
-            You need to have installed: </p>
+          <p>If you want to use these additional algorithms you have to meet the
+            requirements and load <code>load/load-with-add.lisp</code>. If you
+            have the path findable for <code>Quicklisp</code> you also can
+            evaluate <code class="lisp">(ql:quickload :mlep-add)</code>.  You
+            need to have installed: </p>
+
           <ul>
             <li><code>Quicklisp</code>: <a
                 href="http://www.quicklisp.org/" target="_blank">http://www.quicklisp.org/</a></li>
@@ -412,7 +407,7 @@ CL-USER 4 &gt; (mlep:classify net :verbose t)
               and <code>BLAS</code> is known to <code>cffi</code>, for
               example: <code class="lisp">(push #P"/usr/lib/"
                 cffi:*foreign-library-directories*)</code>. You find
-              this line of code in <code>load-with-add.lisp</code> –
+              this line of code in <code>src/additional/push-cffi-dir.lisp</code> –
               adjust it to your needs.</li>
           </ul>
         </div>
