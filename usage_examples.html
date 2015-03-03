@@ -20,7 +20,7 @@
         <p><a href="#k-nearest">2. K-nearest neighbors</a></p>
         <p><a href="#k-means">3. K-means</a></p>
         <p><a href="#naive-bayes">4. Naive Bayes</a></p>
-		<p><a href="#markov-chains">5. Markov-Chains</a></p>
+		    <p><a href="#markov-chains">5. Markov-Chains</a></p>
         <p><a href="#perceptron">6. Perceptron</a></p>
         <p><a href="#ml">7. Maximum-Likelihood</a></p>
         <p><a href="#mlp">8. Multi-Layer-Perceptron</a></p>
@@ -36,10 +36,12 @@
       <h2 id="main">Main</h2>
       <h3 id="loading">1. Loading the library</h3>
       <div>
-        <p>To quickly load <code>cl-mlep</code> via <code>ASDF</code>, you only
-          have to load the <code>load/load.lisp</code> file. If you have the
-          path findable for <code>Quicklisp</code> you also can evaluate
-          <code class="lisp">(ql:quickload :mlep)</code>.</p>
+        <p>To load <code>cl-mlep</code>, just call <code
+        class="lisp">(ql:quickload :mlep)</code>. Of course this assumes that
+        you have <a href="http://www.quicklisp.org"
+        target="_blank">Quicklisp</a> installed. If this it not the case, you
+        should consider installing it or you load
+        <code>load/load.lisp</code>.</p>
 	  </div>
       <h3 id="k-nearest">2. K-nearest neighbors</h3>
       <div>
@@ -389,10 +391,8 @@ CL-USER 4 &gt; (mlep:classify net :verbose t)
               Decomposition</em>, provided by <code>lla</code> (Lisp
             Linear Algebra).</p>
           <p>If you want to use these additional algorithms you have to meet the
-            requirements and load <code>load/load-with-add.lisp</code>. If you
-            have the path findable for <code>Quicklisp</code> you also can
-            evaluate <code class="lisp">(ql:quickload :mlep-add)</code>.  You
-            need to have installed: </p>
+            requirements and call <code class="lisp">(ql:quickload
+            :mlep-add)</code> or load <code>load/load-with-add.lisp</code>.</p>
 
           <ul>
             <li><code>Quicklisp</code>: <a
