@@ -406,9 +406,8 @@ CL-USER 4 &gt; (mlep:classify net :verbose t)
               that the directory containing the dynamic libraries of <code>LAPACK</code>
               and <code>BLAS</code> is known to <code>cffi</code>, for
               example: <code class="lisp">(push #P"/usr/lib/"
-                cffi:*foreign-library-directories*)</code>. You find
-              this line of code in <code>src/additional/push-cffi-dir.lisp</code> –
-              adjust it to your needs.</li>
+                cffi:*foreign-library-directories*)</code>. This should be handled by <code>src/mlep-add.asd</code> –
+              adjust the path in the <code>perform :after</code> method to your needs.</li>
           </ul>
         </div>
         <h3 id="pca">2. Principal Component Analysis</h3>
