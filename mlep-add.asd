@@ -20,7 +20,6 @@
 ; directory for my dynlibs
 (defmethod perform :after ((op load-op) c)
   (if (string-equal (slot-value c 'asdf::name) "cffi")
-      (set (intern "*FOREIGN-LIBRARY-DIRECTORIES*" :cffi)
-           (cons #P"/usr/lib/"
-                 (eval (intern "*FOREIGN-LIBRARY-DIRECTORIES*"
-                               :cffi))))))
+      (let ((libsdir (intern "*FOREIGN-LIBRARY-DIRECTORIES*" :cffi))
+            (libpath #P"/usr/lib/"))
+        (pushnew libpath (symbol-value libsdir)))))
