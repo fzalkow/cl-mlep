@@ -51,7 +51,6 @@
           (setf (aref data i d) (- (aref data i d) (aref means d)))))
       ; run svd
       (let ((my-svd (svd data)))
-        (print my-svd)
         (setf unitary-matrix1 (svd-u my-svd))
         (setf unitary-matrix2 (svd-vt my-svd))
         (setf singular-values (diagonal-matrix-elements (svd-d my-svd)))
