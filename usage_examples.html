@@ -485,8 +485,11 @@ x
 x: [-7.877416952765128D0, 7.751870145577836D0]
 y: [-0.10089977392073896D0, 0.10551908955805312D0]
 </code></pre>
-        <p>You see the whole space is shifted so that the main diagonal
-          becomes the x-axis. The y-axis has very little variance: this
+        <p>You see the whole space is shifted so that the main diagonal becomes
+          the x-axis. The second element returned by the call to <code
+          class="lisp">mlep:run</code> can be interpreted as the new basis
+          vectors (here rounded <code class="lisp">((-0.7 -0.71) (-0.71
+          0.7))</code>).  The new y-axis has very little variance: this
           dimension could be left out if we want to reduce the
           dimensionality:</p>
         <pre><code class="lisp">CL-USER 7 &gt; (mlep-add:transform pca)
