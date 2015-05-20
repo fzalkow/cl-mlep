@@ -15,7 +15,7 @@
   (* x (- 1.0d0 x)))
 
 (defun d-tanh (x)
-  (- 1.0d0  (square x)))
+  (- 1.0d0 (square (tanh x))))
 
 (defparameter *diff-function-dict* (make-hash-table :size 2))
 (setf (gethash #'step-function *diff-function-dict*) #'d-step-function)
