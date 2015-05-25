@@ -28,6 +28,11 @@
     :initform nil
     :accessor output-net
     :documentation "The output of all neurons of the network.")
+   (output-net-before-activation
+    :initarg :output-net-before-activation
+    :initform nil
+    :accessor output-net-before-activation
+    :documentation "The output of all neurons of the network before the activation function was applied.")
    (weight-init-range
     :initarg :weight-init-range
     :initform '(-0.1d0 0.1d0)
@@ -61,9 +66,10 @@
   (initialize instance))
 
 (defmethod initialize ((instance neuronal-network) &key)
-  (with-slots (net-structure output-net weight-init-range weights) instance
+  (with-slots (net-structure output-net output-net-before-activation weight-init-range weights) instance
     (setf weights (net-structure-to-weights net-structure weight-init-range))
-    (setf output-net (net-structure-to-array net-structure 1.0d0))))
+    (setf output-net (net-structure-to-array net-structure 1.0d0))
+    (setf output-net-before-activation (net-structure-to-array net-structure 1.0d0))))
 
 (defun net-structure-to-weights (net-structure &optional weight-init-range)
   (let* ((len-1 (1- (length net-structure)))
@@ -96,38 +102,42 @@
 
          
 (defmethod forward ((instance neuronal-network) &key input)
-  (with-slots (weights output-net activation-function) instance
+  (with-slots (weights output-net output-net-before-activation activation-function) instance
     (let ((tmp (make-array (1+ (first (array-dimensions input)))
-                           :initial-element 1.0d0)))                   
+                           :initial-element 1.0d0)))  
       ; initialize input (with bias)
       (dotimes (i (first (array-dimensions input)))
         (setf (aref tmp i) (aref input i)))
       (setf (aref output-net 0) tmp)
+      (setf (aref output-net-before-activation 0) tmp)
 
       (dotimes-fromto (layer 1 (first (array-dimensions output-net))
                              (aref output-net (1- (first (array-dimensions output-net)))))
-        (setf (aref output-net layer)
-              (map 'vector activation-function
-                   (2d-col-to-vector
-                    (multiply-matrices (vector-to-2d-col (aref output-net (1- layer)))
-                                       (aref weights (1- layer))))))))))
+
+        (let ((input-in-inet (2d-col-to-vector
+                              (multiply-matrices (vector-to-2d-col (aref output-net (1- layer)))
+                                                 (aref weights (1- layer))))))
+          (setf (aref output-net-before-activation layer) input-in-inet)
+          (setf (aref output-net layer)
+                (map 'vector activation-function input-in-inet)))))))
 
 (defmethod backprop ((instance neuronal-network) input wanted)
-  (with-slots (weights output-net activation-function learning-rate) instance
+  (with-slots (weights output-net output-net-before-activation activation-function learning-rate) instance
     (let* ((len (first (array-dimensions output-net)))
            (out (forward instance :input input))
            (error (map 'vector #'- wanted out))
            (delta (make-array (1- len) :element-type 'array)))
       ; compute deltas
       (setf (aref delta (- len 2))
-            (map 'vector #'* error (map 'vector (diff activation-function) out)))
+            (map 'vector #'* error (map 'vector (diff activation-function) 
+                                        (aref output-net-before-activation (1- len)))))
       (loop for layer from (- len 2) downto 1 do
             (setf (aref delta (1- layer))
                   (map 'vector #'*
                        (2d-col-to-vector
                         (multiply-matrices (vector-to-2d-col (aref delta layer))
                                            (transpose (aref weights layer))))
-                       (map 'vector (diff activation-function) (aref output-net layer)))))
+                       (map 'vector (diff activation-function) (aref output-net-before-activation layer)))))
       ; adjust weights
       (dotimes (i (first (array-dimensions weights)))
         (let ((layer (vector-to-2d-col (aref output-net i)))
