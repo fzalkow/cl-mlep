@@ -1,5 +1,7 @@
 # cl-mlep
 
+[![Quicklisp](http://quickdocs.org/badge/cl-mlep.svg)](http://quickdocs.org/cl-mlep)
+
 `cl-mlep` is a Common Lisp Machine Learning library for Educational Purposes.
 
 It aims at providing a collection of simple machine learning algorithms with the following claims:
