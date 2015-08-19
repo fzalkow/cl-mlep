@@ -24,6 +24,7 @@
         <p><a href="#perceptron">6. Perceptron</a></p>
         <p><a href="#ml">7. Maximum-Likelihood</a></p>
         <p><a href="#mlp">8. Multi-Layer-Perceptron</a></p>
+        <p><a href="#imputer">9. Imputing missing values</a></p>
         <p class="head"><a href="#add">Additional</a></p>
         <p><a href="#about-add">1. Why additional?</a></p>
         <p><a href="#pca">2. Principal Component Analysis</a></p>
@@ -348,7 +349,7 @@ CL-USER 2 &gt; (mlep:run lik)
             some <a href="notes_cl-random.html">notes</a> to <code>cl-random</code>)
             to generate new data from this distribution.</p>
         </div>
-        <h3 id="mlp">9. Multi-Layer-Perceptron</h3>
+        <h3 id="mlp">8. Multi-Layer-Perceptron</h3>
         <div>
           <p>Whereas a simple <em>Single-Layer-Perceptron</em> is only
             capable of solving linear separation problems, arbitrary
@@ -377,6 +378,27 @@ CL-USER 4 &gt; (mlep:classify net :verbose t)
 </code></pre>
           <p>We see it learned XOR.</p>
         </div>
+
+        <h3 id="imputer">9. Imputing missing values</h3>
+        <div>
+          <p>One can impute missing values by taking the mean of an attribute value (for numerical data) or taking the mode, i.e. the most frequent value (for categorical data). Missing values have to be denoted by a fixed object (<code>nil</code> per default).</p>
+          <pre><code class="lisp">CL-USER 1 &gt; (setf categories '(a b c d))
+(A B C D)
+
+CL-USER 2 &gt; (setf data (loop repeat 10 collect (list (random 100) (nth (random 4) categories))))
+((44 B) (24 C) (80 C) (50 B) (95 D) (6 D) (14 A) (6 D) (18 D) (72 A))
+
+CL-USER 3 &gt; (setf my-imputer (make-instance 'mlep:imputer :data-set data))
+#&lt;MLEP:IMPUTER 22B30A87&gt;
+
+CL-USER 4 &gt; (mlep:run my-imputer)
+#(409/10 D)
+
+CL-USER 5 &gt; (mlep:transform my-imputer :new-data '((nil a) (17 c) (87 nil)))
+((409/10 A) (17 C) (87 D))
+</code></pre>
+        </div>
+
         <h2 id="add">Additional</h2>
         <h3 id="about-add">1. Why Additional?</h3>
         <div>
