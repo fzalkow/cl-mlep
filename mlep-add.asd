@@ -11,6 +11,8 @@
     :licence "The MIT License <http://opensource.org/licenses/MIT>"
     :description
     "Additional algorithms for cl-mlep that violate its non-dependency-claim."
+    :description
+    "Additional algorithms for cl-mlep that violate its non-dependency-claim."
     :depends-on (:mlep :cffi :lla :cl-num-utils)
     :serial t
     :pathname #P"src/additional/"

@@ -84,3 +84,20 @@ column of SET. Column means the corresponding nth values of each sublist."
           (push (nth (nth idx idxs) x) result)
           (setf idxs (remove-idx idxs idx))
           (decf len))))))
+
+(defun most-frequent-value (x &key (test #'eql))
+  "Get the most frequent value of a sequence x."
+  (let ((value nil)
+        (times 0)
+        (counter (make-hash-table :test test))
+        (tmp-times))
+    (map nil #'(lambda (item)
+                 (if (gethash item counter)
+                     (setf tmp-times (incf (gethash item counter)))
+                   (setf (gethash item counter) 1
+                         tmp-times 1))
+                 (when (> tmp-times times)
+                   (setf times tmp-times
+                         value item)))
+         x)
+    value))

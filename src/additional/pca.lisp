@@ -56,14 +56,6 @@
         (setf singular-values (diagonal-matrix-elements (svd-d my-svd)))
         (list unitary-matrix1 unitary-matrix2 singular-values)))))
 
-(defgeneric transform (instance &key)
-  (:documentation "@arg[instance]{an instance of @code{principal-component-analysis}}
-@arg[components]{a number that states how many dimensions should be used for a transformation (default is @code{nil} which means that it should use all dimensions of @code{data-set}}
-@arg[inverse]{do an inverse transformation (@code{t} or @code{nil}, default: @code{nil})}
-@arg[new-data]{do the transformation on this data-set (default is @code{nil} which means, that it should use @code{data-set})}
-@return{the transformed data-set}
-Project some data on its principal components."))
-
 (defmethod transform ((instance principal-component-analysis) &key components inverse new-data)
   (with-slots (data means unitary-matrix2) instance
     (when (and new-data (consp new-data))

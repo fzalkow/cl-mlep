@@ -16,6 +16,7 @@
 @item{@code{neuronal-network}: nothing}
 @item{@code{perceptron}: nothing}
 @item{@code{principal-component-analysis}: list with three matrices - @code{unitary-matrix1 U} (orthogonal matrix), @code{unitary-matrix2 Vt} (orthogonal matrix) and @code{singular-values} (a diagonal matrix with the diagonal elements being the singular values called @code{D}; @code{UxDxVt} should be a reconstruction of the input matrix)}
+@item{@code{imputer}: The default replace values for each column.}
 }}
 A general interface for 'running' a learning algorithm."))
 
@@ -100,3 +101,11 @@ Get the current means."))
   (:documentation "@arg[instance]{an instance of @code{neuronal-network} or @code{perceptron}}
 @return{the learning-rate}
 The learning rate controls the size of change during updating the weights."))
+
+(defgeneric transform (instance &key)
+  (:documentation "@arg[instance]{an instance of @code{principal-component-analysis} or @code{imputer}}
+@arg[components]{a number that states how many dimensions should be used for a transformation (default is @code{nil} which means that it should use all dimensions of @code{data-set}}
+@arg[inverse]{do an inverse transformation (@code{t} or @code{nil}, default: @code{nil})}
+@arg[new-data]{do the transformation on this data-set (default is @code{nil} which means, that it should use @code{data-set})}
+@return{the transformed data-set}
+Project some data on its principal components. / Fit missing values."))

@@ -5,7 +5,7 @@
 (defpackage :mlep-add
   (:use :cl :mlep :lla :cl-num-utils.matrix)
   (:export
-   :principal-component-analysis :transform)
+   :principal-component-analysis)
   
   (:import-from :mlep
    :list-to-2d-array :map-pointwise :multiply-matrices :run)

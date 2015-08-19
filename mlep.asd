@@ -48,4 +48,5 @@ following claims:
                                        (:file "naive-bayes")
                                        (:file "perceptron")
                                        (:file "likelihood")
-                                       (:file "neuronal")))))
+                                       (:file "neuronal")
+                                       (:file "imputer")))))

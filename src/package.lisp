@@ -15,7 +15,8 @@
    :perceptron
    :markov-chain :synthesize :order :analyze :probabilities :unique
    :max-likelihood
-   :neuronal-network :forward :learning-rate)
+   :neuronal-network :forward :learning-rate
+   :imputer :transform)
   (:documentation "@code{mlep} is a Machine Learning library for Educational Purposes.
 
 It aims at providing a collection of simple machine learning algorithms with the
