@@ -12,7 +12,7 @@
   (/ 1.0d0 (+ 1.0d0 (expt +e+ (- x)))))
 
 (defun d-sigmoid (x)
-  (* x (- 1.0d0 x)))
+  (/ (expt +e+ x) (square (+ (expt +e+ x) 1))))
 
 (defun d-tanh (x)
   (- 1.0d0 (square (tanh x))))
