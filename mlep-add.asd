@@ -2,7 +2,7 @@
 
 (defpackage :mlep-add-asd
   (:use :cl :asdf))
-  
+
 (defsystem :mlep-add
     :name "mlep-add"
     :version "0.0.1"
@@ -13,7 +13,7 @@
     "Additional algorithms for cl-mlep that violate its non-dependency-claim."
     :description
     "Additional algorithms for cl-mlep that violate its non-dependency-claim."
-    :depends-on (:mlep :cffi :lla :cl-num-utils)
+    :depends-on (:mlep :cffi :lla :num-utils)
     :serial t
     :pathname #P"src/additional/"
     :components ((:file "package")
