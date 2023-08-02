@@ -1,6 +1,6 @@
 ;;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Base: 10 -*-
 
-(let ((directory (butlast (pathname-directory *load-truename*))))
+(let ((directory (pathname-directory *load-truename*)))
   (ql:quickload :cffi)
   (ql:quickload :lla)
   (unless (find-package :lla)
